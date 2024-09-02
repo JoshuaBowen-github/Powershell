@@ -1,6 +1,11 @@
 # PATHS TO BE CHECKED
-$path1 = ###ADD DESIRED PATH
-$path2 = ###ADD DESIRED PATH###
+param(
+	[Parameter(Mandatory=$true)]
+	[string[]]$Paths,
+	
+	[Parameter(Mandatory=$true)]
+	[string]$OutputPath
+)
 
 # CHECK ALL FILES AND SUBFOLDERS
 $files1 = Get-ChildItem -Path $path1 -File -Recurse
@@ -11,8 +16,15 @@ $duplicates = @()
 $totalSizeBytes = 0
 
 # Compare files based on name and creation date
-foreach ($file1 in $files1) {
-    foreach ($file2 in $files2) {
+foreach ($path in $Paths) {
+	$allfiles += Get-ChildItem -Path $path -File -Recurse
+}
+
+for ($i = 0; $i -lt $allFiles.Count; $i++) {
+	for ($j = $i + 1; $j -lt $allFiles.Count; $j++) {
+		$file1 = $allFiles[$i]
+		$file2 = $allfiles[$j]
+		
         if ($file1.Name -eq $file2.Name -and $file1.CreationTime -eq $file2.CreationTime) {
             $size1 = $file1.Length  
             $size2 = $file2.Length  
@@ -46,6 +58,6 @@ if ($duplicates.Count -eq 0) {
 }
 
 # Export results to a CSV file
-$duplicates | Export-Csv -Path ###DESIRED DOWNLOAD LOCATION### -NoTypeInformation
+$duplicates | Export-Csv -Path $OutputPath -NoTypeInformation
 
 
